@@ -8,6 +8,7 @@ import {
   IApiResponse,
   successResponse,
 } from "src/common/interfaces/api-response.interface";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,22 @@ export class AuthService {
     const tokenData = this.generateToken(user);
 
     return successResponse(tokenData, "User registered successfully");
+  }
+
+  async signIn(
+    username: string,
+    password: string
+  ): Promise<IApiResponse<ISignupResponseData>> {
+    const user = await this.usersService.findByUsername(username);
+    if (!user) {
+      throw new ConflictException("User not found");
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new ConflictException("Invalid password");
+    }
+    const tokenData = this.generateToken(user);
+    return successResponse(tokenData, "User signed in successfully");
   }
 
   private generateToken(user: User): ISignupResponseData {
