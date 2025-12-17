@@ -6,9 +6,15 @@ import { User } from "./entities/user.entity";
 import { Murmur } from "./entities/murmur.entity";
 import { Like } from "./entities/like.entitiy";
 import { Follow } from "./entities/follow.entity";
+import { AuthModule } from "./auth/auth.module";
+import { UsersModule } from "./users/users.module";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: "mysql",
       host: "localhost",
@@ -20,6 +26,8 @@ import { Follow } from "./entities/follow.entity";
       synchronize: true,
     }),
     TypeOrmModule.forFeature([User, Murmur, Like, Follow]),
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
