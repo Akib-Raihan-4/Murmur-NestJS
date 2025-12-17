@@ -11,6 +11,7 @@ import { UsersModule } from "./users/users.module";
 import { ConfigModule } from "@nestjs/config";
 import { FollowModule } from "./follow/follow.module";
 import { MurmurModule } from "./murmur/murmur.module";
+import { LikeModule } from "./like/like.module";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MurmurModule } from "./murmur/murmur.module";
     UsersModule,
     FollowModule,
     MurmurModule,
+    LikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

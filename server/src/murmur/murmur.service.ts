@@ -42,6 +42,7 @@ export class MurmurService {
         name: fullMurmur.user.name,
       },
       likesCount: fullMurmur.likes?.length || 0,
+      isLiked: false,
     };
   }
 
@@ -73,6 +74,7 @@ export class MurmurService {
         name: m.user.name,
       },
       likesCount: m.likes?.length || 0,
+      isLiked: m.likes?.some((like) => like.userId === userId) || false,
     }));
 
     const totalPages = Math.ceil(total / limit);
@@ -145,6 +147,7 @@ export class MurmurService {
         name: m.user.name,
       },
       likesCount: m.likes?.length || 0,
+      isLiked: m.likes?.some((like) => like.userId === userId) || false,
     }));
 
     const totalPages = Math.ceil(total / limit);
