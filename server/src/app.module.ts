@@ -10,6 +10,7 @@ import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
 import { ConfigModule } from "@nestjs/config";
 import { FollowModule } from "./follow/follow.module";
+import { MurmurModule } from "./murmur/murmur.module";
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { FollowModule } from "./follow/follow.module";
     AuthModule,
     UsersModule,
     FollowModule,
+    MurmurModule,
   ],
   controllers: [AppController],
   providers: [AppService],

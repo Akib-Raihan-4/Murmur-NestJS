@@ -3,6 +3,7 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
+  BadRequestException,
 } from "@nestjs/common";
 import { Response } from "express";
 import { IApiResponse } from "../interfaces/api-response.interface";
@@ -18,21 +19,37 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
+      const res = exception.getResponse();
 
-      const exceptionResponse = exception.getResponse();
-
-      if (typeof exceptionResponse === "string") {
-        message = exceptionResponse;
-      } else if (
-        typeof exceptionResponse === "object" &&
-        exceptionResponse !== null
+      if (
+        exception instanceof BadRequestException &&
+        typeof res === "object" &&
+        res !== null
       ) {
-        if (Array.isArray((exceptionResponse as any).message)) {
-          message = (exceptionResponse as any).message.join(", ");
-        } else if ((exceptionResponse as any).message) {
-          message = (exceptionResponse as any).message;
+        const validationErrors = (res as any).message;
+
+        if (Array.isArray(validationErrors)) {
+          if (validationErrors.includes("text must be a string")) {
+            message = "Text must be a string";
+          } else if (validationErrors.includes("Text cannot be empty")) {
+            message = "Text cannot be empty";
+          } else if (
+            validationErrors.includes("Murmur cannot exceed 280 characters")
+          ) {
+            message = "Murmur cannot exceed 280 characters";
+          } else {
+            message = validationErrors[0];
+          }
+        } else if (typeof validationErrors === "string") {
+          message = validationErrors;
         }
+      } else if (typeof res === "string") {
+        message = res;
+      } else if ((res as any).message) {
+        message = (res as any).message;
       }
+    } else if (exception instanceof Error) {
+      message = exception.message;
     }
 
     const apiResponse: IApiResponse = {
