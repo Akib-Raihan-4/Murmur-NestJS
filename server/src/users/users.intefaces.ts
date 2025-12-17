@@ -4,4 +4,5 @@ export interface IProfileData {
   name: string;
   followersCount: number;
   followingCount: number;
+  isFollowing: boolean;
 }
