@@ -16,11 +16,15 @@ import { CreateMurmurDto } from "./murmur.dto";
 import { MurmurService } from "./murmur.service";
 import { successResponse } from "src/common/interfaces/api-response.interface";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { LikeService } from "src/like/like.service";
 
 @UseGuards(JwtAuthGuard)
 @Controller("murmur")
 export class MurmurController {
-  constructor(private murmurService: MurmurService) {}
+  constructor(
+    private murmurService: MurmurService,
+    private likeService: LikeService
+  ) {}
   @Post()
   async create(
     @CurrentUser() currentUser: User,
@@ -77,6 +81,19 @@ export class MurmurController {
       paginated.data,
       "Timeline fetched successfully",
       paginated.pagination
+    );
+  }
+
+  @Post(":id/toggle-like")
+  async toggleLike(
+    @CurrentUser() currentUser: User,
+    @Param("id", ParseIntPipe) murmurId: number
+  ) {
+    const result = await this.likeService.toggleLike(currentUser.id, murmurId);
+
+    return successResponse(
+      result,
+      result.isLiked ? "Murmur liked" : "Murmur unliked"
     );
   }
 }

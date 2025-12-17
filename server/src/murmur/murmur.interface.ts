@@ -8,4 +8,5 @@ export interface IMurmurResponse {
     name: string;
   };
   likesCount: number;
+  isLiked: boolean;
 }
