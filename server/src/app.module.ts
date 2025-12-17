@@ -9,6 +9,7 @@ import { Follow } from "./entities/follow.entity";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
 import { ConfigModule } from "@nestjs/config";
+import { FollowModule } from "./follow/follow.module";
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ConfigModule } from "@nestjs/config";
     TypeOrmModule.forFeature([User, Murmur, Like, Follow]),
     AuthModule,
     UsersModule,
+    FollowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
