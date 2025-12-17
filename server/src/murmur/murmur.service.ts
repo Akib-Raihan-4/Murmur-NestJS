@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Murmur } from "src/entities/murmur.entity";
 import { Repository } from "typeorm";
@@ -54,6 +58,78 @@ export class MurmurService {
       take: limit,
       skip,
     });
+
+    if (murmurs.length === 0 && page > 1) {
+      throw new NotFoundException("Page not found");
+    }
+
+    const data: IMurmurResponse[] = murmurs.map((m) => ({
+      id: m.id,
+      text: m.text,
+      createdAt: m.createdAt,
+      author: {
+        id: m.user.id,
+        username: m.user.username,
+        name: m.user.name,
+      },
+      likesCount: m.likes?.length || 0,
+    }));
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      pagination: {
+        total,
+        totalPages,
+        currentPage: page,
+        perPage: limit,
+        hasNextPage: page < totalPages,
+      },
+    };
+  }
+
+  async delete(murmurId: number, userId: number): Promise<void> {
+    const murmur = await this.murmurRepository.findOne({
+      where: { id: murmurId },
+      select: ["id", "userId"],
+    });
+
+    if (!murmur) {
+      throw new NotFoundException("Murmur not found");
+    }
+
+    if (murmur.userId !== userId) {
+      throw new ForbiddenException("You can only delete your own murmurs");
+    }
+
+    await this.murmurRepository.delete(murmurId);
+  }
+
+  async getTimeline(
+    userId: number,
+    { page = 1, limit = 10 }: IPaginationParams = {}
+  ): Promise<IPaginatedResponse<IMurmurResponse[]>> {
+    const skip = (page - 1) * limit;
+
+    const followedUserIdsSubQuery = this.murmurRepository.manager
+      .createQueryBuilder()
+      .select("follow.followingId")
+      .from("follows", "follow")
+      .where("follow.followerId = :userId", { userId })
+      .andWhere("follow.followingId != :userId", { userId })
+      .getQuery();
+
+    const [murmurs, total] = await this.murmurRepository
+      .createQueryBuilder("murmur")
+      .leftJoinAndSelect("murmur.user", "user")
+      .leftJoinAndSelect("murmur.likes", "likes")
+      .where(`murmur.userId IN (${followedUserIdsSubQuery})`)
+      .setParameters({ userId })
+      .orderBy("murmur.createdAt", "DESC")
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
 
     if (murmurs.length === 0 && page > 1) {
       throw new NotFoundException("Page not found");
