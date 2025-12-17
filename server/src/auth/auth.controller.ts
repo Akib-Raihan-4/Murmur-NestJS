@@ -1,7 +1,7 @@
 import { Body, Controller, Post, HttpCode, HttpStatus } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { IApiResponse } from "src/common/interfaces/api-response.interface";
-import { SignupDto } from "./auth.dto";
+import { SignInDto, SignupDto } from "./auth.dto";
 import { ISignupResponseData } from "./auth.interfaces";
 
 @Controller("auth")
@@ -18,5 +18,13 @@ export class AuthController {
       signupDto.password,
       signupDto.name
     );
+  }
+
+  @Post("signin")
+  @HttpCode(HttpStatus.OK)
+  async signIn(
+    @Body() signinDto: SignInDto
+  ): Promise<IApiResponse<ISignupResponseData>> {
+    return this.authService.signIn(signinDto.username, signinDto.password);
   }
 }

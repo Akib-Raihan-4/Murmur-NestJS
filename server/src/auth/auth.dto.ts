@@ -14,3 +14,13 @@ export class SignupDto {
   @IsNotEmpty()
   name: string;
 }
+
+export class SignInDto {
+  @IsString()
+  @IsNotEmpty()
+  username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}
