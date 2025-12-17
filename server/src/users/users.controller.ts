@@ -1,21 +1,39 @@
-import { Controller, Get, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+} from "@nestjs/common";
 import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
-import { IApiResponse, successResponse } from "src/common/interfaces/api-response.interface";
+import {
+  IApiResponse,
+  successResponse,
+} from "src/common/interfaces/api-response.interface";
 import { User } from "src/entities/user.entity";
 import { IProfileData } from "./users.intefaces";
+import { UsersService } from "./users.service";
 
+@UseGuards(JwtAuthGuard)
 @Controller("users")
 export class UsersController {
-  @UseGuards(JwtAuthGuard)
+  constructor(private usersService: UsersService) {}
   @Get("me")
-  getProfile(@CurrentUser() user: User): IApiResponse<IProfileData> {
-    const profileData: IProfileData = {
-      id: user.id,
-      username: user.username,
-      name: user.name,
-    };
+  async getMyProfile(
+    @CurrentUser() user: User
+  ): Promise<IApiResponse<IProfileData>> {
+    const profile = await this.usersService.getUserProfile(user.id);
 
-    return successResponse(profileData, "Profile fetched successfully");
+    return successResponse(profile, "Profile fetched successfully");
+  }
+
+  @Get(":id")
+  async getUserProfile(
+    @Param("id", ParseIntPipe) userId: number
+  ): Promise<IApiResponse<IProfileData>> {
+    const profile = await this.usersService.getUserProfile(userId);
+
+    return successResponse(profile, "User profile fetched successfully");
   }
 }

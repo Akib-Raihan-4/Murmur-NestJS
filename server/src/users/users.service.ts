@@ -1,8 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { User } from "src/entities/user.entity";
+import { IProfileData } from "./users.intefaces";
 
 @Injectable()
 export class UsersService {
@@ -31,5 +32,24 @@ export class UsersService {
 
   async findById(id: number): Promise<User> {
     return this.usersRepository.findOne({ where: { id } });
+  }
+
+  async getUserProfile(userId: number): Promise<IProfileData> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ["followers", "following"],
+    });
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    return {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      followersCount: user.followers?.length || 0,
+      followingCount: user.following?.length || 0,
+    };
   }
 }
