@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
+  Param,
   ParseIntPipe,
   Post,
   Query,
@@ -46,6 +48,34 @@ export class MurmurController {
     return successResponse(
       paginated.data,
       "Your murmurs fetched successfully",
+      paginated.pagination
+    );
+  }
+
+  @Delete(":id")
+  async deleteMurmur(
+    @CurrentUser() currentUser: User,
+    @Param("id", ParseIntPipe) murmurId: number
+  ) {
+    await this.murmurService.delete(murmurId, currentUser.id);
+
+    return successResponse(null, "Murmur deleted successfully");
+  }
+
+  @Get("timeline")
+  async getTimeline(
+    @CurrentUser() currentUser: User,
+    @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query("limit", new DefaultValuePipe(10), ParseIntPipe) limit: number = 10
+  ) {
+    const paginated = await this.murmurService.getTimeline(currentUser.id, {
+      page,
+      limit,
+    });
+
+    return successResponse(
+      paginated.data,
+      "Timeline fetched successfully",
       paginated.pagination
     );
   }
