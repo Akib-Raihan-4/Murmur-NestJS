@@ -16,11 +16,16 @@ import {
 import { User } from "src/entities/user.entity";
 import { IProfileData } from "./users.intefaces";
 import { UsersService } from "./users.service";
+import { IMurmurResponse } from "src/murmur/murmur.interface";
+import { MurmurService } from "src/murmur/murmur.service";
 
 @UseGuards(JwtAuthGuard)
 @Controller("users")
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private murmurService: MurmurService
+  ) {}
   @Get("me")
   async getMyProfile(
     @CurrentUser() user: User
@@ -58,6 +63,26 @@ export class UsersController {
       result.data,
       "Users fetched successfully",
       result.pagination
+    );
+  }
+
+  @Get(":id/murmurs")
+  async getUserMurmurs(
+    @CurrentUser() currentUser: User,
+    @Param("id", ParseIntPipe) userId: number,
+    @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query("limit", new DefaultValuePipe(10), ParseIntPipe) limit: number = 10
+  ): Promise<IApiResponse<IMurmurResponse[]>> {
+    const paginated = await this.murmurService.getMurmursByUserId(
+      userId,
+      currentUser.id,
+      { page, limit }
+    );
+
+    return successResponse(
+      paginated.data,
+      "User murmurs fetched successfully",
+      paginated.pagination
     );
   }
 }

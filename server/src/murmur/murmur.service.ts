@@ -165,4 +165,52 @@ export class MurmurService {
       },
     };
   }
+
+  async getMurmursByUserId(
+    targetUserId: number,
+    viewerUserId?: number,
+    { page = 1, limit = 10 }: IPaginationParams = {}
+  ): Promise<IPaginatedResponse<IMurmurResponse[]>> {
+    const skip = (page - 1) * limit;
+
+    const [murmurs, total] = await this.murmurRepository.findAndCount({
+      where: { userId: targetUserId },
+      relations: ["user", "likes"],
+      order: { createdAt: "DESC" },
+      take: limit,
+      skip,
+    });
+
+    if (murmurs.length === 0 && page > 1) {
+      throw new NotFoundException("Page not found");
+    }
+
+    const data: IMurmurResponse[] = murmurs.map((m) => ({
+      id: m.id,
+      text: m.text,
+      createdAt: m.createdAt,
+      author: {
+        id: m.user.id,
+        username: m.user.username,
+        name: m.user.name,
+      },
+      likesCount: m.likes?.length || 0,
+      isLiked: viewerUserId
+        ? m.likes?.some((like) => like.userId === viewerUserId) || false
+        : false,
+    }));
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      pagination: {
+        total,
+        totalPages,
+        currentPage: page,
+        perPage: limit,
+        hasNextPage: page < totalPages,
+      },
+    };
+  }
 }
