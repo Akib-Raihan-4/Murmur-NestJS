@@ -8,6 +8,12 @@ import {
   IUserProfileResponse,
   IUsersListResponse,
 } from '../interfaces/user.interfaces'
+import {
+  ICreateMurmurRequest,
+  ICreateMurmurResponse,
+  ITimelineResponse,
+  IToggleLikeResponse,
+} from '../interfaces/murmur.interfaces'
 
 const API_BASE_URL = 'http://localhost:3001/api'
 
@@ -37,4 +43,13 @@ export const userService = {
     api.get<IUsersListResponse>(`/users?page=${page}&limit=${limit}`),
   followUser: (userId: number) => api.post(`/follow/${userId}`),
   unfollowUser: (userId: number) => api.delete(`/follow/${userId}`),
+}
+
+export const murmurService = {
+  getTimeline: (page: number = 1, limit: number = 10) =>
+    api.get<ITimelineResponse>(`/murmur/timeline?page=${page}&limit=${limit}`),
+  toggleLike: (murmurId: number) =>
+    api.post<IToggleLikeResponse>(`/murmur/${murmurId}/toggle-like`),
+  createMurmur: (data: ICreateMurmurRequest) =>
+    api.post<ICreateMurmurResponse>('/murmur', data),
 }
