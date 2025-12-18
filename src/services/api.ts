@@ -4,7 +4,10 @@ import {
   ISignInData,
   ISignUpData,
 } from '../interfaces/auth.interfaces'
-import { IUserProfileResponse } from '../interfaces/user.interfaces'
+import {
+  IUserProfileResponse,
+  IUsersListResponse,
+} from '../interfaces/user.interfaces'
 
 const API_BASE_URL = 'http://localhost:3001/api'
 
@@ -27,4 +30,11 @@ export const authService = {
   signUp: (data: ISignUpData) => api.post<IAuthResponse>('/auth/signup', data),
   signIn: (data: ISignInData) => api.post<IAuthResponse>('/auth/signin', data),
   getProfile: () => api.get<IUserProfileResponse>('/users/me'),
+}
+
+export const userService = {
+  getUsers: (page: number = 1, limit: number = 10) =>
+    api.get<IUsersListResponse>(`/users?page=${page}&limit=${limit}`),
+  followUser: (userId: number) => api.post(`/follow/${userId}`),
+  unfollowUser: (userId: number) => api.delete(`/follow/${userId}`),
 }
