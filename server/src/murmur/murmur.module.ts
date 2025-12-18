@@ -9,5 +9,6 @@ import { LikeModule } from "src/like/like.module";
   imports: [TypeOrmModule.forFeature([Murmur]), LikeModule],
   providers: [MurmurService],
   controllers: [MurmurController],
+  exports: [MurmurService],
 })
 export class MurmurModule {}
