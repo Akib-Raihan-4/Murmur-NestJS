@@ -126,7 +126,9 @@ export class MurmurService {
       .createQueryBuilder("murmur")
       .leftJoinAndSelect("murmur.user", "user")
       .leftJoinAndSelect("murmur.likes", "likes")
-      .where(`murmur.userId IN (${followedUserIdsSubQuery})`)
+      .where(
+        `murmur.userId IN (${followedUserIdsSubQuery}) OR murmur.userId = :userId`
+      )
       .setParameters({ userId })
       .orderBy("murmur.createdAt", "DESC")
       .skip(skip)
