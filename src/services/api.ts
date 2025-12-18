@@ -52,4 +52,7 @@ export const murmurService = {
     api.post<IToggleLikeResponse>(`/murmur/${murmurId}/toggle-like`),
   createMurmur: (data: ICreateMurmurRequest) =>
     api.post<ICreateMurmurResponse>('/murmur', data),
+  getUserMurmurs: (page: number = 1, limit: number = 10) =>
+    api.get<ITimelineResponse>(`/murmur?page=${page}&limit=${limit}`),
+  deleteMurmur: (murmurId: number) => api.delete(`/murmur/${murmurId}`),
 }
