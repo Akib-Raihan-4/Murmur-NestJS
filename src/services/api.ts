@@ -43,6 +43,12 @@ export const userService = {
     api.get<IUsersListResponse>(`/users?page=${page}&limit=${limit}`),
   followUser: (userId: number) => api.post(`/follow/${userId}`),
   unfollowUser: (userId: number) => api.delete(`/follow/${userId}`),
+  getUserById: (userId: number) =>
+    api.get<IUserProfileResponse>(`/users/${userId}`),
+  getUserMurmurs: (userId: number, page: number = 1, limit: number = 10) =>
+    api.get<ITimelineResponse>(
+      `/users/${userId}/murmurs?page=${page}&limit=${limit}`,
+    ),
 }
 
 export const murmurService = {
