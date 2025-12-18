@@ -96,4 +96,16 @@ export class MurmurController {
       result.isLiked ? "Murmur liked" : "Murmur unliked"
     );
   }
+  @Get(":id")
+  async getMurmur(
+    @CurrentUser() currentUser: User,
+    @Param("id", ParseIntPipe) murmurId: number
+  ) {
+    const murmur = await this.murmurService.getMurmurById(
+      murmurId,
+      currentUser.id
+    );
+
+    return successResponse(murmur, "Murmur fetched successfully");
+  }
 }

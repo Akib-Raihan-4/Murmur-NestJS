@@ -61,4 +61,6 @@ export const murmurService = {
   getUserMurmurs: (page: number = 1, limit: number = 10) =>
     api.get<ITimelineResponse>(`/murmur?page=${page}&limit=${limit}`),
   deleteMurmur: (murmurId: number) => api.delete(`/murmur/${murmurId}`),
+  getMurmurById: (murmurId: number) =>
+    api.get<ICreateMurmurResponse>(`/murmur/${murmurId}`),
 }
