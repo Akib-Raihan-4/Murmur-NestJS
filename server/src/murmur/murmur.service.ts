@@ -213,4 +213,32 @@ export class MurmurService {
       },
     };
   }
+
+  async getMurmurById(
+    murmurId: number,
+    viewerUserId: number
+  ): Promise<IMurmurResponse> {
+    const murmur = await this.murmurRepository.findOne({
+      where: { id: murmurId },
+      relations: ["user", "likes"],
+    });
+
+    if (!murmur) {
+      throw new NotFoundException("Murmur not found");
+    }
+
+    return {
+      id: murmur.id,
+      text: murmur.text,
+      createdAt: murmur.createdAt,
+      author: {
+        id: murmur.user.id,
+        username: murmur.user.username,
+        name: murmur.user.name,
+      },
+      likesCount: murmur.likes?.length || 0,
+      isLiked:
+        murmur.likes?.some((like) => like.userId === viewerUserId) || false,
+    };
+  }
 }

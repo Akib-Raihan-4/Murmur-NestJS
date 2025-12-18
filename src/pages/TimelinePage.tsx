@@ -3,10 +3,12 @@ import { useTimeline } from '../hooks/useTimeline'
 import { murmurService } from '../services/api'
 import { IMurmur } from '../interfaces/murmur.interfaces'
 import { useAuth } from '../contexts/AuthContext'
+import { MurmurDetailPage } from './MurmurDetailPage'
 
 export const TimelinePage: React.FC = () => {
   const { user } = useAuth()
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedMurmurId, setSelectedMurmurId] = useState<number | null>(null)
 
   const {
     murmurs,
@@ -24,7 +26,21 @@ export const TimelinePage: React.FC = () => {
   const [postError, setPostError] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null)
 
-  const handleToggleLike = async (id: number) => {
+  if (selectedMurmurId) {
+    return (
+      <MurmurDetailPage
+        murmurId={selectedMurmurId}
+        onBack={() => {
+          setSelectedMurmurId(null)
+          refetch()
+        }}
+      />
+    )
+  }
+
+  const handleToggleLike = async (id: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+
     setLikeLoading(id)
 
     setMurmurs((prev) =>
@@ -84,7 +100,9 @@ export const TimelinePage: React.FC = () => {
     }
   }
 
-  const handleDeleteMurmur = async (id: number) => {
+  const handleDeleteMurmur = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+
     setDeleteLoading(id)
     try {
       await murmurService.deleteMurmur(id)
@@ -166,7 +184,11 @@ export const TimelinePage: React.FC = () => {
         {murmurs.map((m) => {
           const isOwnMurmur = m.author.username === user?.username
           return (
-            <div key={m.id} className="bg-white shadow rounded-lg p-6">
+            <div
+              key={m.id}
+              className="bg-white shadow rounded-lg p-6 cursor-pointer hover:shadow-md transition"
+              onClick={() => setSelectedMurmurId(m.id)}
+            >
               <div className="flex justify-between mb-2">
                 <div>
                   <div className="font-semibold">{m.author.name}</div>
@@ -180,7 +202,7 @@ export const TimelinePage: React.FC = () => {
                   </span>
                   {isOwnMurmur && (
                     <button
-                      onClick={() => handleDeleteMurmur(m.id)}
+                      onClick={(e) => handleDeleteMurmur(m.id, e)}
                       disabled={deleteLoading === m.id}
                       className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm"
                     >
@@ -193,7 +215,7 @@ export const TimelinePage: React.FC = () => {
               <p className="mb-4 whitespace-pre-wrap">{m.text}</p>
 
               <button
-                onClick={() => handleToggleLike(m.id)}
+                onClick={(e) => handleToggleLike(m.id, e)}
                 disabled={likeLoading === m.id}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition disabled:opacity-50 ${
                   m.isLiked
